@@ -9,7 +9,7 @@
 [![User Guide](https://img.shields.io/badge/User%20Guide-read-0969da?style=flat-square)](docs/user-guide.md)
 [![Development](https://img.shields.io/badge/Development-build-8250df?style=flat-square)](docs/development.md)
 [![Specification](https://img.shields.io/badge/Specification-review-1f883d?style=flat-square)](docs/specification.md)
-[![ADR](https://img.shields.io/badge/ADR-decisions-d1242f?style=flat-square)](docs/adr/)
+[![ADR](https://img.shields.io/badge/ADR-decisions-d1242f?style=flat-square)](./docs/adr)
 [![CHANGELOG](https://img.shields.io/badge/Changelog-history-6e7781?style=flat-square)](CHANGELOG.md)
 
 FeROS Flasher safely installs and verifies FeROS target images on physical
@@ -93,7 +93,7 @@ number of bytes contained in the source image.
 
 Thank you for your interest in contributing to **FeROS**.
 
-FeROS Flasher is part of the **FeROS ecosystem** and provides foundational packages shared across Entiqon projects.
+FeROS Flasher is part of the **FeROS ecosystem** and provides foundational packages shared across FeROS projects.
 
 - **Original Author:** Isidro A. López G.
 - **Organization:** FeROS Project
