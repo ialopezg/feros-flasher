@@ -11,13 +11,14 @@ use crate::{
     target::Target,
 };
 
-#[derive(Debug, Clone)]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub struct Image {
     path: PathBuf,
     size: u64,
     sha256: String,
 }
 
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 impl Image {
     pub fn inspect(path: &Path, target: &Target) -> Result<Self> {
         let canonical_path = path.canonicalize().map_err(|error| {

@@ -1,11 +1,23 @@
 # FeROS Flasher
 
+[![CI](https://github.com/ialopezg/feros-flasher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ialopezg/feros-flasher/actions/workflows/ci.yml)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![macOS](https://img.shields.io/badge/macOS-supported-2ea44f?style=flat-square&logo=apple&logoColor=white)](docs/user-guide.md)
+[![Linux](https://img.shields.io/badge/Linux-build%20verified-0969da?style=flat-square&logo=linux&logoColor=white)](docs/specification.md)
+[![Windows](https://img.shields.io/badge/Windows-build%20verified-0969da?style=flat-square&logo=windows11&logoColor=white)](docs/specification.md)
+
+[![User Guide](https://img.shields.io/badge/User%20Guide-read-0969da?style=flat-square)](docs/user-guide.md)
+[![Development](https://img.shields.io/badge/Development-build-8250df?style=flat-square)](docs/development.md)
+[![Specification](https://img.shields.io/badge/Specification-review-1f883d?style=flat-square)](docs/specification.md)
+[![ADR](https://img.shields.io/badge/ADR-decisions-d1242f?style=flat-square)](docs/adr/)
+[![CHANGELOG](https://img.shields.io/badge/Changelog-history-6e7781?style=flat-square)](CHANGELOG.md)
+
 FeROS Flasher safely installs and verifies FeROS target images on physical
 media. It is an independent Rust product and does not build target images.
 
 ## Current Status
 
-- Project horizon: Horizon 1 â€” Foundation
+- Project horizon: Horizon 1 — Foundation
 - Product milestone: initial macOS CLI
 - Supported host: macOS
 - Supported target: `rk3566-powkiddy-x55`
@@ -75,3 +87,22 @@ The macOS backend rejects:
 The initial implementation never formats media or modifies partition tables
 separately. It writes the selected image from byte zero and verifies exactly the
 number of bytes contained in the source image.
+
+---
+## Contributing to FeROS Flasher
+
+Thank you for your interest in contributing to **FeROS**.
+
+FeROS Flasher is part of the **FeROS ecosystem** and provides foundational packages shared across Entiqon projects.
+
+- **Original Author:** Isidro A. López G.
+- **Organization:** FeROS Project
+- **Official Repository:** https://github.com/ialopezg/feros
+
+Ideas, experiments, technical review, and contributions are welcome.
+
+---
+
+## License
+
+**FeROS Flasher** is licensed under the [MIT License](LICENSE).

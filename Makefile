@@ -1,6 +1,6 @@
 CARGO ?= cargo
 
-BIN_ROOT := ../bin
+BIN_ROOT ?= bin
 
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
@@ -57,7 +57,8 @@ release:
 		"$(HOST_ARCH)"
 	@$(CARGO) build \
 		--manifest-path Cargo.toml \
-		--release
+		--release \
+		--locked
 	@mkdir -p $(PUBLISHED_DIR)
 	@install -m 0755 \
 		$(BUILD_EXECUTABLE) \

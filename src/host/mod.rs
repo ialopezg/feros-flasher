@@ -12,6 +12,7 @@ use crate::error::FlasherError;
 
 use crate::{error::Result, image::Image, target::Target};
 
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 #[derive(Debug, Clone)]
 pub struct Device {
     pub identifier: String,

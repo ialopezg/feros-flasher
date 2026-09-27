@@ -1,2 +1,5 @@
-# Rust build artifacts
+# Build artifacts
 /target/
+
+# Binary artifacts
+/bin/

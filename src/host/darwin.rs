@@ -26,20 +26,10 @@ impl Backend {
 
     fn discover_physical_disks(&self) -> Result<Vec<Device>> {
         let listing = diskutil_plist(&["list", "physical"])?;
-        let entries = listing
-            .get("AllDisksAndPartitions")
-            .and_then(Value::as_array)
-            .ok_or_else(|| FlasherError::message("diskutil did not return a physical disk list"))?;
+        let identifiers = whole_disk_identifiers(&listing)?;
 
         let mut devices = Vec::new();
-        for entry in entries {
-            let Some(identifier) = entry
-                .as_dictionary()
-                .and_then(|value| string_value(value, "DeviceIdentifier"))
-            else {
-                continue;
-            };
-
+        for identifier in identifiers {
             let info = diskutil_plist(&["info", &format!("/dev/{identifier}")])?;
             if let Some(device) = self.device_from_info(&info)? {
                 devices.push(device);
@@ -56,7 +46,9 @@ impl Backend {
         };
 
         if !is_whole_disk_identifier(&identifier)
-            || !bool_value(info, "Whole").unwrap_or(false)
+            || !bool_value(info, "WholeDisk")
+                .or_else(|| bool_value(info, "Whole"))
+                .unwrap_or(false)
             || identifier == self.startup_disk
         {
             return Ok(None);
@@ -178,7 +170,7 @@ impl Backend {
         io::stdin().read_line(&mut confirmation)?;
         if confirmation.trim() != phrase {
             return Err(FlasherError::message(
-                "confirmation did not match; no storage device was modified",
+                "operation aborted: required user confirmation was not provided; no storage device was modified",
             ));
         }
 
@@ -218,6 +210,39 @@ impl Backend {
 
         Ok(())
     }
+}
+
+fn whole_disk_identifiers(listing: &Dictionary) -> Result<Vec<String>> {
+    if let Some(disks) = listing.get("WholeDisks").and_then(Value::as_array) {
+        let identifiers = disks
+            .iter()
+            .filter_map(Value::as_string)
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+
+        if !identifiers.is_empty() {
+            return Ok(identifiers);
+        }
+    }
+
+    let entries = listing
+        .get("AllDisksAndPartitions")
+        .and_then(Value::as_array)
+        .ok_or_else(|| FlasherError::message("diskutil did not return a physical disk list"))?;
+
+    let identifiers = entries
+        .iter()
+        .filter_map(Value::as_dictionary)
+        .filter_map(|entry| string_value(entry, "DeviceIdentifier"))
+        .collect::<Vec<_>>();
+
+    if identifiers.is_empty() {
+        return Err(FlasherError::message(
+            "diskutil returned an empty physical disk list",
+        ));
+    }
+
+    Ok(identifiers)
 }
 
 impl MediaBackend for Backend {

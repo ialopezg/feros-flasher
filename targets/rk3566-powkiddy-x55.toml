@@ -1,0 +1,39 @@
+[target]
+id = "rk3566-powkiddy-x55"
+manifest_version = 1
+status = "experimental"
+
+[soc]
+name = "RK3566"
+arch = "aarch64"
+cores = 4
+
+[board]
+manufacturer = "PowKiddy"
+name = "X55"
+bsp = "core/boards/powkiddy/x55"
+ram_mb = 1024
+storage = "emmc"
+display = "5.5in-720x720"
+input = ["dpad", "abxy", "shoulders", "sticks"]
+
+[build]
+platform = "x55"
+entry_address = 0x03fe0000
+image_format = "rkns"
+ddr_firmware = "firmware/rockchip/rk3566/rk3566_ddr_1056MHz_v1.26.bin"
+
+[artifacts]
+binary = "bin/rk3566-powkiddy-x55/feros.bin"
+image = "build/x55/boot/feros-x55.img"
+
+[media]
+signature_offset = 0x8000
+signature = "RKNS"
+write_offset = 0
+
+[features]
+uart_debug = false
+mmu = false
+framebuffer = false
+physical_boot_verified = false

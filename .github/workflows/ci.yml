@@ -1,0 +1,33 @@
+name: FeROS Flasher CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: ${{ matrix.host }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: Linux
+            runner: ubuntu-latest
+          - host: macOS
+            runner: macos-latest
+          - host: Windows
+            runner: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate FeROS Flasher
+        uses: ./ci

@@ -1,0 +1,36 @@
+name: FeROS Flasher validation
+description: Format, lint, test, and compile the FeROS Flasher
+
+inputs:
+  manifest-path:
+    description: Path to the FeROS Flasher Cargo manifest
+    required: false
+    default: flasher/Cargo.toml
+
+runs:
+  using: composite
+  steps:
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy, rustfmt
+
+    - name: Check formatting
+      shell: bash
+      run: cargo fmt --manifest-path "${{ inputs.manifest-path }}" --all --check
+
+    - name: Check all targets
+      shell: bash
+      run: cargo check --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked
+
+    - name: Run tests
+      shell: bash
+      run: cargo test --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked
+
+    - name: Run Clippy
+      shell: bash
+      run: cargo clippy --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked -- -D warnings
+
+    - name: Build release executable
+      shell: bash
+      run: cargo build --manifest-path "${{ inputs.manifest-path }}" --release --locked

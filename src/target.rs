@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::error::{FlasherError, Result};
 
-const RK3566_POWKIDDY_X55_MANIFEST: &str = include_str!("../../targets/rk3566-powkiddy-x55.toml");
+const RK3566_POWKIDDY_X55_MANIFEST: &str = include_str!("../targets/rk3566-powkiddy-x55.toml");
 
 #[derive(Debug, Clone)]
 pub struct Target {
