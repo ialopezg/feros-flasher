@@ -1,6 +1,8 @@
 CARGO ?= cargo
 
 BIN_ROOT ?= bin
+GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || printf "none")
+BUILD_TIMESTAMP := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || printf "unknown")
 
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
@@ -55,9 +57,12 @@ release:
 	@printf "FeROS Flasher: building release for %s/%s...\n" \
 		"$(HOST_OS)" \
 		"$(HOST_ARCH)"
-	@$(CARGO) build \
+	@FEROS_BUILD_COMMIT="$(GIT_COMMIT)" \
+		FEROS_BUILD_TIMESTAMP="$(BUILD_TIMESTAMP)" \
+		$(CARGO) build \
 		--manifest-path Cargo.toml \
-		--release
+		--release \
+		--locked
 	@mkdir -p $(PUBLISHED_DIR)
 	@install -m 0755 \
 		$(BUILD_EXECUTABLE) \
