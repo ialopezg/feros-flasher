@@ -3,3 +3,6 @@
 
 # Binary artifacts
 /bin/
+
+# Distribution artifacts
+/dist/

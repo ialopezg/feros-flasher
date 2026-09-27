@@ -1,4 +1,5 @@
 use std::{
+    fmt::Write as _,
     fs::File,
     io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
@@ -11,14 +12,13 @@ use crate::{
     target::Target,
 };
 
-#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+#[derive(Debug, Clone)]
 pub struct Image {
     path: PathBuf,
     size: u64,
     sha256: String,
 }
 
-#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 impl Image {
     pub fn inspect(path: &Path, target: &Target) -> Result<Self> {
         let canonical_path = path.canonicalize().map_err(|error| {
@@ -101,8 +101,16 @@ fn calculate_sha256(path: &Path) -> Result<String> {
         if read == 0 {
             break;
         }
+
         hasher.update(&buffer[..read]);
     }
 
-    Ok(format!("{:x}", hasher.finalize()))
+    let digest = hasher.finalize();
+    let mut sha256 = String::with_capacity(digest.len() * 2);
+
+    for byte in digest {
+        write!(&mut sha256, "{byte:02x}").expect("writing SHA-256 bytes to a String cannot fail");
+    }
+
+    Ok(sha256)
 }

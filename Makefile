@@ -57,8 +57,7 @@ release:
 		"$(HOST_ARCH)"
 	@$(CARGO) build \
 		--manifest-path Cargo.toml \
-		--release \
-		--locked
+		--release
 	@mkdir -p $(PUBLISHED_DIR)
 	@install -m 0755 \
 		$(BUILD_EXECUTABLE) \
