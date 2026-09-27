@@ -5,7 +5,7 @@ inputs:
   manifest-path:
     description: Path to the FeROS Flasher Cargo manifest
     required: false
-    default: flasher/Cargo.toml
+    default: Cargo.toml
 
 runs:
   using: composite
