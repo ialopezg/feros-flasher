@@ -136,10 +136,26 @@ fn run() -> Result<()> {
 fn print_header() {
     println!("{PRODUCT_NAME}\n");
     println!("{PRODUCT_DESCRIPTION}\n");
+    println!("Author: {}", env!("CARGO_PKG_AUTHORS"));
+    println!("Version: {}", env!("CARGO_PKG_VERSION"));
+    println!(
+        "Commit: {}",
+        option_env!("FEROS_BUILD_COMMIT").unwrap_or("none")
+    );
+    println!(
+        "Built: {}",
+        option_env!("FEROS_BUILD_TIMESTAMP").unwrap_or("unknown")
+    );
+    println!(
+        "Processor: {} ({})",
+        processor_name(),
+        operating_system_name()
+    );
 }
 
 fn print_help(topic: Option<HelpTopic>) {
     print_header();
+    println!();
 
     match topic {
         None => {
@@ -182,21 +198,6 @@ fn print_help(topic: Option<HelpTopic>) {
 
 fn print_version() {
     print_header();
-    println!("Author: {}", env!("CARGO_PKG_AUTHORS"));
-    println!("Version: {}", env!("CARGO_PKG_VERSION"));
-    println!(
-        "Commit: {}",
-        option_env!("FEROS_BUILD_COMMIT").unwrap_or("none")
-    );
-    println!(
-        "Built: {}",
-        option_env!("FEROS_BUILD_TIMESTAMP").unwrap_or("unknown")
-    );
-    println!(
-        "Processor: {} ({})",
-        processor_name(),
-        operating_system_name()
-    );
 }
 
 fn processor_name() -> &'static str {

@@ -1,32 +1,32 @@
 # Changelog
 
-All notable changes to FeROS Flasher are documented in this file.
+All notable changes to the Flasher are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.1] - 2026-09-27
 
 ### Added
 
-- Initial Rust command-line application with `list` and `flash` commands.
-- Target resolution through versioned FeROS target manifests embedded at build
-  time.
-- RKNS image-signature, capacity, and SHA-256 validation.
-- Native macOS device discovery through structured `diskutil` property lists.
-- Startup-disk exclusion and whole, physical, writable, removable-media
-  eligibility checks.
-- Exact destructive-operation confirmation before privileged access.
-- Raw-device writing, synchronization, byte-for-byte verification, and media
-  ejection on macOS.
-- Explicit unsupported host backends for Linux and Windows.
-- Product-owned Makefile for staging native release executables under `bin/`.
-- Product-owned technical specification, user guide, development guide, and
-  architecture decision records.
-- Native Linux, macOS, and Windows compilation validation through the reusable
-  Flasher CI action.
+- Added `help`, contextual help, and `version` commands.
+- Added commit, build time, and host metadata to release binaries.
+
+### Changed
+
+- Unified help and version output under the product header.
+- Updated SHA-256 handling for `sha2` 0.11.
+
+## [0.1.0] - 2026-09-27
+
+### Added
+
+- Added the Rust `list` and `flash` commands.
+- Added target profiles and image validation.
+- Added safe macOS device discovery, writing, verification, and ejection.
+- Added Linux and Windows placeholder backends.
+- Added product documentation, release builds, and cross-platform CI.
 
 ### Verified
 
-- Completed the macOS write-and-verify workflow using a removable microSD card
-  through the built-in SDXC reader.
+- Verified physical microSD writing on macOS.
