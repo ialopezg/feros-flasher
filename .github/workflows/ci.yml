@@ -31,3 +31,5 @@ jobs:
 
       - name: Validate FeROS Flasher
         uses: ./ci
+        with:
+          manifest-path: Cargo.toml
