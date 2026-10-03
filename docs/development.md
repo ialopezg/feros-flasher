@@ -55,8 +55,11 @@ bin/darwin/aarch64/flasher
 
 Windows executables use the `.exe` suffix. Darwin and Linux executables do not.
 
-The root `bin/` directory contains generated artifacts and is ignored by Git.
-`flasher/Cargo.lock` is versioned because FeROS Flasher is an application.
+The repository-local `bin/` directory contains generated artifacts and is
+ignored by Git. Workspace integration may override `BIN_ROOT` to use the
+workspace's shared `bin/` directory.
+
+`Cargo.lock` is versioned because FeROS Flasher is an application.
 
 ## Release Verification
 
@@ -110,8 +113,8 @@ validation suite, and build the release from the reviewed commit.
 make clean
 ```
 
-This removes `flasher/target/`. It does not remove executables already staged
-under the root `bin/` directory.
+This removes the Cargo build artifacts under `target/`. It does not remove
+executables already staged under the configured binary output directory.
 
 ## Future Distribution Requirements
 

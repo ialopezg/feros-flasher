@@ -41,7 +41,8 @@ through repository-relative paths.
 
 - The Flasher can be built, tested, tagged, and released without FeROS Core.
 - Its CI workflow and reusable validation action move with the product.
-- Generated executables are staged under the repository-local `bin/` tree.
+- Generated executables are staged under the repository-local `bin/` tree by default.
+- Workspace integration may override `BIN_ROOT` to stage executables in a shared directory.
 - FeROS Core documentation links to the independent Flasher repository.
 - Compatibility-profile changes must be reviewed against the corresponding
   released FeROS target contract.
