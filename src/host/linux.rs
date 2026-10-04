@@ -1,8 +1,7 @@
 use crate::{
     error::{FlasherError, Result},
-    host::{Device, MediaBackend},
+    host::{Device, FlashEvent, MediaBackend},
     image::Image,
-    target::Target,
 };
 
 struct Backend;
@@ -12,7 +11,12 @@ impl MediaBackend for Backend {
         Err(unsupported())
     }
 
-    fn flash(&self, _target: &Target, _image: &Image, _device: Option<&str>) -> Result<()> {
+    fn flash(
+        &self,
+        _image: &Image,
+        _device: &Device,
+        _observer: &mut dyn FnMut(FlashEvent),
+    ) -> Result<()> {
         Err(unsupported())
     }
 }

@@ -1,15 +1,11 @@
-use std::{
-    io::{self, Write},
-    process::{Command, Output},
-};
+use std::process::{Command, Output};
 
 use plist::{Dictionary, Value};
 
 use crate::{
     error::{FlasherError, Result},
-    host::{human_size, Device, MediaBackend},
+    host::{validate_selection, Device, FlashEvent, MediaBackend},
     image::Image,
-    target::Target,
 };
 
 struct Backend {
@@ -92,46 +88,6 @@ impl Backend {
         }))
     }
 
-    fn select_device(&self, devices: &[Device], requested: Option<&str>) -> Result<Device> {
-        if devices.is_empty() {
-            return Err(FlasherError::message(
-                "no eligible removable physical disks were found",
-            ));
-        }
-
-        if let Some(requested) = requested {
-            return devices
-                .iter()
-                .find(|device| device.device_path == requested || device.identifier == requested)
-                .cloned()
-                .ok_or_else(|| {
-                    FlasherError::message(format!("requested device is not eligible: {requested}"))
-                });
-        }
-
-        print_devices(devices);
-        print!("Select [0-{}]: ", devices.len());
-        io::stdout().flush()?;
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input)?;
-        let selection = input
-            .trim()
-            .parse::<usize>()
-            .map_err(|_| FlasherError::message("invalid device selection"))?;
-
-        if selection == 0 {
-            return Err(FlasherError::message(
-                "operation cancelled; no storage device was modified",
-            ));
-        }
-
-        devices
-            .get(selection - 1)
-            .cloned()
-            .ok_or_else(|| FlasherError::message("invalid device selection"))
-    }
-
     fn refresh_selected_device(&self, selected: &Device) -> Result<Device> {
         let current = self.discover_physical_disks()?;
         current
@@ -145,47 +101,21 @@ impl Backend {
             })
     }
 
-    fn confirm(&self, target: &Target, image: &Image, device: &Device) -> Result<()> {
-        println!("\nFeROS Flasher: destructive media operation\n");
-        println!("  Target:        {} ({})", target.display_name, target.id);
-        println!("  Device:        {}", device.device_path);
-        println!("  Model:         {}", device.model);
-        println!("  Protocol:      {}", device.protocol);
-        println!("  Capacity:      {}", human_size(device.size));
-        println!("  Internal:      {}", device.internal);
-        println!("  Removable:     {}", device.removable);
-        println!("  Image:         {}", image.path().display());
-        println!("  Write size:    {}", human_size(image.size()));
-        println!("  Image SHA-256: {}", image.sha256());
-        println!(
-            "\nExisting partition and filesystem metadata in the written region will be overwritten."
-        );
-        println!("This operation cannot be undone.\n");
-
-        let phrase = format!("WRITE {}", device.device_path);
-        print!("Type '{phrase}' to continue: ");
-        io::stdout().flush()?;
-
-        let mut confirmation = String::new();
-        io::stdin().read_line(&mut confirmation)?;
-        if confirmation.trim() != phrase {
-            return Err(FlasherError::message(
-                "operation aborted: required user confirmation was not provided; no storage device was modified",
-            ));
-        }
-
-        Ok(())
-    }
-
-    fn write_and_verify(&self, image: &Image, device: &Device) -> Result<()> {
-        println!("\nFeROS Flasher: unmounting {}...", device.device_path);
+    fn write_and_verify(
+        &self,
+        image: &Image,
+        device: &Device,
+        observer: &mut dyn FnMut(FlashEvent),
+    ) -> Result<()> {
+        observer(FlashEvent::Unmounting);
         run_checked(Command::new("diskutil").args(["unmountDisk", &device.device_path]))?;
 
-        println!(
-            "FeROS Flasher: writing {} to {}...",
-            human_size(image.size()),
-            device.raw_device_path
-        );
+        // Recheck after unmounting, before starting the writer.
+        let current = self.refresh_selected_device(device)?;
+        validate_selection(device, &current, image.size())?;
+        observer(FlashEvent::Writing {
+            bytes: image.size(),
+        });
         run_checked(
             Command::new("sudo")
                 .arg("dd")
@@ -195,7 +125,7 @@ impl Backend {
         )?;
         run_checked(&mut Command::new("sync"))?;
 
-        println!("FeROS Flasher: verifying written bytes...");
+        observer(FlashEvent::Verifying);
         run_checked(
             Command::new("sudo")
                 .arg("cmp")
@@ -205,7 +135,7 @@ impl Backend {
                 .arg(&device.raw_device_path),
         )?;
 
-        println!("FeROS Flasher: ejecting {}...", device.device_path);
+        observer(FlashEvent::Ejecting);
         run_checked(Command::new("diskutil").args(["eject", &device.device_path]))?;
 
         Ok(())
@@ -250,22 +180,16 @@ impl MediaBackend for Backend {
         self.discover_physical_disks()
     }
 
-    fn flash(&self, target: &Target, image: &Image, requested: Option<&str>) -> Result<()> {
-        let selected = self.select_device(&self.discover_physical_disks()?, requested)?;
-        if image.size() > selected.size {
-            return Err(FlasherError::message(format!(
-                "image size {} exceeds device capacity {}",
-                human_size(image.size()),
-                human_size(selected.size)
-            )));
-        }
-
-        let selected = self.refresh_selected_device(&selected)?;
-        self.confirm(target, image, &selected)?;
-
-        let selected = self.refresh_selected_device(&selected)?;
-        self.write_and_verify(image, &selected)?;
-        println!("\nFeROS Flasher: target media written and verified successfully.");
+    fn flash(
+        &self,
+        image: &Image,
+        selected: &Device,
+        observer: &mut dyn FnMut(FlashEvent),
+    ) -> Result<()> {
+        let current = self.refresh_selected_device(selected)?;
+        validate_selection(selected, &current, image.size())?;
+        self.write_and_verify(image, &current, observer)?;
+        observer(FlashEvent::Completed);
         Ok(())
     }
 }
@@ -323,28 +247,9 @@ fn run_output(command: &mut Command) -> Result<Output> {
 }
 
 fn run_checked(command: &mut Command) -> Result<()> {
-    let rendered = format!("{command:?}");
-    let status = command.status()?;
-    if status.success() {
-        Ok(())
-    } else {
-        Err(FlasherError::message(format!("command failed: {rendered}")))
-    }
-}
-
-fn print_devices(devices: &[Device]) {
-    println!("FeROS Flasher: eligible physical disks:\n");
-    for (index, device) in devices.iter().enumerate() {
-        println!(
-            "  {}) {} — {} — {} — {}",
-            index + 1,
-            device.device_path,
-            device.model,
-            human_size(device.size),
-            device.protocol
-        );
-    }
-    println!("  0) Cancel\n");
+    // Capture child diagnostics instead of writing them directly to a frontend.
+    // sudo may still use /dev/tty for authentication; GUI authorization is separate work.
+    run_output(command).map(|_| ())
 }
 
 fn is_whole_disk_identifier(identifier: &str) -> bool {

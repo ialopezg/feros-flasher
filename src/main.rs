@@ -1,13 +1,14 @@
-mod error;
-mod host;
-mod image;
-mod target;
+mod cli;
 
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::{error::Result, host::human_size};
+use feros_flasher::{
+    error::Result,
+    host::{self, human_size, validate_selection},
+    image, target,
+};
 
 const PRODUCT_NAME: &str = "FeROS Flasher";
 const PRODUCT_DESCRIPTION: &str = "Safe physical-media installation and recovery for FeROS";
@@ -126,7 +127,12 @@ fn run() -> Result<()> {
             let backend = host::current()?;
             let target = target::resolve(&target_id)?;
             let image = image::Image::inspect(&image_path, &target)?;
-            backend.flash(&target, &image, device.as_deref())?;
+            let selected = cli::select_device(&backend.eligible_devices()?, device.as_deref())?;
+            validate_selection(&selected, &selected, image.size())?;
+            cli::confirm(&target, &image, &selected)?;
+            backend.flash(&image, &selected, &mut |event| {
+                cli::show_progress(event, &selected)
+            })?;
         }
     }
 
