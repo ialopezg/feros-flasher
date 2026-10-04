@@ -281,13 +281,13 @@ fn print_help(topic: Option<HelpTopic>) {
             println!("  flasher help --version");
         }
         Some(HelpTopic::Channel) => {
-            println!("Channel list and management operations.\n");
+            println!("Manage device support repositories.\n");
             println!("Usage:");
-            println!("  flasher channel                         Display current channel");
-            println!("  flasher channel --add channel-name      Add a channel to the current list");
-            println!("  flasher channel --select channel-name   Select an existing channel");
-            println!("  flasher channel --delete channel-name   Delete given channel");
-            println!("  flasher channel --update                Works with selected channel and check for device repository updates.");
+            println!("  flasher channel                  Display the default repository");
+            println!("  flasher channel --list           List configured repositories");
+            println!("  flasher channel --add            Add a repository interactively");
+            println!("  flasher channel --select <INDEX> Set the default repository");
+            println!("  flasher channel --delete <INDEX> Delete a non-default repository");
         }
         Some(HelpTopic::List) => {
             println!("List eligible physical devices without modifying them.\n");
@@ -295,15 +295,15 @@ fn print_help(topic: Option<HelpTopic>) {
             println!("  flasher list");
         }
         Some(HelpTopic::Flash) => {
-            println!("Write and verify a FeROS repository image.\n");
+            println!("Write and verify a FeROS target image.\n");
             println!("Usage:");
             println!("  flasher flash \\");
-            println!("    --repository <TARGET> \\");
+            println!("    --target <TARGET> \\");
             println!("    --image <IMAGE> \\");
             println!("    [--device <DEVICE>]\n");
             println!("Options:");
-            println!("  --repository <TARGET>   Canonical FeROS repository identifier");
-            println!("  --image <IMAGE>     Path to the prepared repository image");
+            println!("  --target <TARGET>   Canonical FeROS target identifier");
+            println!("  --image <IMAGE>     Path to the prepared target image");
             println!("  --device <DEVICE>   Optional whole-device path");
         }
         Some(HelpTopic::Version) => {
