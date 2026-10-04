@@ -1,36 +1,22 @@
 name: FeROS Flasher validation
-description: Format, lint, test, and compile the FeROS Flasher
-
+description: Validate Rust and run isolated native CLI regression checks
 inputs:
   manifest-path:
     description: Path to the FeROS Flasher Cargo manifest
     required: false
     default: Cargo.toml
-
 runs:
   using: composite
   steps:
     - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       with:
         components: clippy, rustfmt
-
-    - name: Check formatting
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.13'
+    - name: Validate and build native candidate
       shell: bash
-      run: cargo fmt --manifest-path "${{ inputs.manifest-path }}" --all --check
-
-    - name: Check all targets
-      shell: bash
-      run: cargo check --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked
-
-    - name: Run tests
-      shell: bash
-      run: cargo test --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked
-
-    - name: Run Clippy
-      shell: bash
-      run: cargo clippy --manifest-path "${{ inputs.manifest-path }}" --all-targets --locked -- -D warnings
-
-    - name: Build release executable
-      shell: bash
-      run: cargo build --manifest-path "${{ inputs.manifest-path }}" --release --locked
+      env:
+        FLASHER_MANIFEST: ${{ inputs.manifest-path }}
+      run: python "$(dirname "$FLASHER_MANIFEST")/scripts/check.py"

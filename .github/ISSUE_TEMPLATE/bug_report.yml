@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible non-security defect.
+body:
+  - type: markdown
+    attributes:
+      value: "For suspected vulnerabilities, follow SECURITY.md. Do not attach private firmware or secrets."
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host OS and architecture
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Commands, expected result, actual result, and minimal synthetic input. Do not repeat a destructive write solely to report this issue.
+    validations:
+      required: true

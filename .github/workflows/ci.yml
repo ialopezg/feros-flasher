@@ -1,35 +1,30 @@
 name: FeROS Flasher CI
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   validate:
     name: ${{ matrix.host }}
     runs-on: ${{ matrix.runner }}
-
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         include:
-          - host: Linux
-            runner: ubuntu-latest
-          - host: macOS
-            runner: macos-latest
-          - host: Windows
-            runner: windows-latest
-
+          - host: Linux x86_64
+            runner: ubuntu-24.04
+          - host: macOS ARM64
+            runner: macos-15
+          - host: Windows x86_64
+            runner: windows-2025
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Validate FeROS Flasher
-        uses: ./ci
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./ci
         with:
           manifest-path: Cargo.toml

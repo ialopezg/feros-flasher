@@ -1,0 +1,20 @@
+name: Feature request
+description: Propose a repository-management or physical-media installation improvement.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and use case
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Hardware or format evidence
+      description: Link public sources when the request changes a platform contract.

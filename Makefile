@@ -1,7 +1,8 @@
 CARGO ?= cargo
+PYTHON ?= python3
 
 BIN_ROOT ?= bin
-GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || printf "none")
+GIT_COMMIT := $(shell git rev-parse HEAD 2>/dev/null || printf "none")
 BUILD_TIMESTAMP := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || printf "unknown")
 
 UNAME_S := $(shell uname -s)
@@ -33,19 +34,19 @@ PUBLISHED_DIR := $(BIN_ROOT)/$(HOST_OS)/$(HOST_ARCH)
 PUBLISHED_EXECUTABLE := \
 	$(PUBLISHED_DIR)/flasher$(EXECUTABLE_SUFFIX)
 
-.PHONY: all check test fmt release clean help
+.PHONY: all check test fmt release verify package clean help
 
 all: release
 
 check:
 	@$(CARGO) check \
 		--manifest-path Cargo.toml \
-		--all-targets
+		--all-targets --locked
 
 test:
 	@$(CARGO) test \
 		--manifest-path Cargo.toml \
-		--all-targets
+		--all-targets --locked
 
 fmt:
 	@$(CARGO) fmt \
@@ -69,6 +70,12 @@ release:
 		$(PUBLISHED_EXECUTABLE)
 	@printf "FeROS Flasher: generated %s\n" "$(PUBLISHED_EXECUTABLE)"
 
+verify:
+	@$(PYTHON) scripts/check.py
+
+package:
+	@$(PYTHON) scripts/package.py $(if $(TAG),--tag $(TAG),)
+
 clean:
 	@$(CARGO) clean \
 		--manifest-path Cargo.toml
@@ -80,4 +87,6 @@ help:
 	@printf "  make test      Run the test suite\n"
 	@printf "  make fmt       Verify Rust formatting\n"
 	@printf "  make release   Build and publish the host executable\n"
+	@printf "  make verify    Run native validation and isolated CLI tests\n"
+	@printf "  make package   Package a clean tested candidate (TAG=vX.Y.Z)\n"
 	@printf "  make clean     Remove Cargo build artifacts\n\n"
