@@ -105,7 +105,17 @@ pub fn show_progress(event: FlashEvent, device: &Device) {
         FlashEvent::Verifying => println!("FeROS Flasher: verifying written bytes..."),
         FlashEvent::Ejecting => println!("FeROS Flasher: ejecting {}...", device.device_path),
         FlashEvent::Completed => {
-            println!("\nFeROS Flasher: target media written and verified successfully.")
+            println!("\nFeROS Flasher: repository media written and verified successfully.")
         }
     }
+}
+
+pub fn prompt(label: &str) -> Result<String> {
+    print!("{label}: ");
+    io::stdout().flush()?;
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input)?;
+
+    Ok(input.trim().to_owned())
 }
