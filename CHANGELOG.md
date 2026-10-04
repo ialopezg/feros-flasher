@@ -5,6 +5,14 @@ All notable changes to the Flasher are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-10-04
+
+- Add persistent repository registration, listing, default selection, and deletion.
+- Classify repositories against the official registry; retain local configuration beside the executable.
+- Share media operations through the Rust library and expose CLI progress stages.
+- Add native candidate packaging, SHA-256 checksums, and draft release automation for macOS, Linux, and Windows.
+- Correct CLI help and document current platform and catalog limitations.
+
 ## [0.1.1] - 2026-09-27
 
 ### Added

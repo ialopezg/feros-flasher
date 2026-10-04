@@ -33,7 +33,7 @@ From the repository root:
 
 ```sh
 bin/darwin/aarch64/flasher flash \
-  --target rk3566-powkiddy-x55 \
+  --repository rk3566-powkiddy-x55 \
   --image build/x55/boot/feros-x55.img
 ```
 
@@ -42,7 +42,7 @@ device. A specific device may be supplied explicitly:
 
 ```sh
 bin/darwin/aarch64/flasher flash \
-  --target rk3566-powkiddy-x55 \
+  --repository rk3566-powkiddy-x55 \
   --image build/x55/boot/feros-x55.img \
   --device /dev/disk4
 ```

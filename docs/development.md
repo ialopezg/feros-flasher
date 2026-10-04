@@ -76,7 +76,7 @@ Confirm that the published executable matches the Cargo release artifact:
 
 ```sh
 cmp \
-  target/release/flasher \
+  repository/release/flasher \
   ../bin/darwin/aarch64/flasher
 ```
 

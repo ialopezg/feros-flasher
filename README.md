@@ -2,108 +2,85 @@
 
 [![CI](https://github.com/ialopezg/feros-flasher/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ialopezg/feros-flasher/actions/workflows/ci.yml)
 [![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
-[![macOS](https://img.shields.io/badge/macOS-supported-2ea44f?style=flat-square&logo=apple&logoColor=white)](docs/user-guide.md)
-[![Linux](https://img.shields.io/badge/Linux-build%20verified-0969da?style=flat-square&logo=linux&logoColor=white)](docs/specification.md)
-[![Windows](https://img.shields.io/badge/Windows-build%20verified-0969da?style=flat-square&logo=windows11&logoColor=white)](docs/specification.md)
+[![Release](https://img.shields.io/github/v/release/ialopezg/feros-flasher?style=flat-square)](https://github.com/ialopezg/feros-flasher/releases)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 [![User Guide](https://img.shields.io/badge/User%20Guide-read-0969da?style=flat-square)](docs/user-guide.md)
 [![Development](https://img.shields.io/badge/Development-build-8250df?style=flat-square)](docs/development.md)
-[![Specification](https://img.shields.io/badge/Specification-review-1f883d?style=flat-square)](docs/specification.md)
 [![ADR](https://img.shields.io/badge/ADR-decisions-d1242f?style=flat-square)](docs/adr)
-[![CHANGELOG](https://img.shields.io/badge/Changelog-history-6e7781?style=flat-square)](CHANGELOG.md)
+[![Changelog](https://img.shields.io/badge/Changelog-history-6e7781?style=flat-square)](CHANGELOG.md)
 
-FeROS Flasher safely installs and verifies FeROS target images on physical
-media. It is an independent Rust product and does not build target images.
+FeROS Flasher installs prepared FeROS images on physical media and verifies the
+written bytes. It is an independent Rust application with a shared library for
+the CLI and a future graphical interface. FeROS Builder owns image construction.
 
-## Current Status
+## v0.2.0 capabilities
 
-- Project horizon: Horizon 1 — Foundation
-- Product milestone: initial macOS CLI
-- Supported host: macOS
-- Supported target: `rk3566-powkiddy-x55`
-- Linux support: not implemented
-- Windows support: not implemented
+| Operation                            | macOS       | Linux           | Windows         |
+|--------------------------------------|-------------|-----------------|-----------------|
+| Help, version, repository management | Implemented | Implemented     | Implemented     |
+| Physical-device listing and flashing | Implemented | Not implemented | Not implemented |
 
-The Flasher is experimental. Review the selected device carefully before
-confirming a write.
+This is experimental software. Automated CLI checks do not establish physical
+media qualification or successful boot on a target device.
 
-## Responsibilities
+## Build and run
 
-FeROS Flasher owns:
-
-- physical-device discovery;
-- startup-disk exclusion;
-- removable-media eligibility checks;
-- image capacity and target-signature checks;
-- explicit destructive-operation confirmation;
-- physical-media writing;
-- byte-for-byte verification;
-- media ejection and clear operation results.
-
-FeROS Toolchain owns:
-
-- source builds;
-- artifact inspection;
-- RKNS construction;
-- complete target-image validation.
-
-## Build
+From the Flasher repository root (`tools/flasher` in the FeROS workspace):
 
 ```sh
-cargo build --manifest-path flasher/Cargo.toml
+cargo build --release --locked
+./target/release/flasher help
+./target/release/flasher version
+./target/release/flasher channel --list
 ```
 
-## List Eligible Devices
+On Windows, the executable is `target/release/flasher.exe`.
+
+## Repositories
 
 ```sh
-cargo run --manifest-path flasher/Cargo.toml -- list
+flasher channel
+flasher channel --add
+flasher channel --list
+flasher channel --select 1
+flasher channel --delete 2
 ```
 
-## Flash the PowKiddy X55 Image
+`--add` asks for an HTTPS URL, an optional name, and whether to select it as the
+default. A blank name uses the URL domain. Registration queries the official
+FeROS Targets registry; it does not download targets or validate the remote
+repository's catalog. An unlisted URL is saved as unofficial.
+
+Configuration is stored in `config/repositories.toml` beside the executable.
+A fresh installation has no configured repositories or selected default. Listing,
+selection, and deletion work offline; adding currently requires access to the
+official registry. The default repository cannot be deleted until another is selected.
+
+The selected repository does not yet change flashing behavior: Flasher still
+uses the embedded `rk3566-powkiddy-x55` target manifest. Repository updates,
+pruning, catalog downloads, and registry caching are not implemented in v0.2.0.
+
+## Physical media (macOS)
 
 ```sh
-cargo run --manifest-path flasher/Cargo.toml -- \
-  flash \
-  --target rk3566-powkiddy-x55 \
-  --image build/x55/boot/feros-x55.img
+flasher list
+flasher flash --target rk3566-powkiddy-x55 --image /path/to/prepared.img
 ```
 
-The interactive flow displays eligible media and requires an exact confirmation
-phrase before writing. Run the Flasher as a normal user. It invokes `sudo` only
-for raw-device access after confirmation.
+Run as a normal user. Review the selected whole disk and image, then enter the
+exact `WRITE /dev/diskN` phrase shown. The backend validates device eligibility,
+capacity, and the image signature, refreshes device metadata, unmounts the disk,
+writes through `sudo`, compares the written bytes, and ejects the disk.
 
-## Safety Model
+Writing overwrites the image-sized region starting at byte zero. Signature and
+hash checks do not authenticate firmware or prove that the device will boot.
 
-The macOS backend rejects:
+## Project
 
-- the current startup disk;
-- partitions instead of whole disks;
-- nonphysical devices;
-- read-only media;
-- fixed internal media that is not removable;
-- media smaller than the selected image;
-- images without the expected target signature.
-
-The initial implementation never formats media or modifies partition tables
-separately. It writes the selected image from byte zero and verifies exactly the
-number of bytes contained in the source image.
-
----
-
-## Contributing to FeROS Flasher
-
-Thank you for your interest in contributing to **FeROS**.
-
-FeROS Flasher is part of the **FeROS ecosystem** and provides foundational packages shared across FeROS projects.
-
-- **Original Author:** Isidro A. López G.
-- **Organization:** FeROS Project
-- **Official Repository:** https://github.com/ialopezg/feros
-
-Ideas, experiments, technical review, and contributions are welcome.
-
----
-
-## License
-
-**FeROS Flasher** is licensed under the [MIT License](LICENSE).
+- Original author: Isidro A. López G.
+- Organization: FeROS Project
+- Repository: https://github.com/ialopezg/feros-flasher
+- [User guide](docs/user-guide.md), [development](docs/development.md),
+  [specification](docs/specification.md)
+- License: [MIT](LICENSE); dependency scope: [third-party notices](THIRD_PARTY.md)
