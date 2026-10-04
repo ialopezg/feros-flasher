@@ -5,7 +5,7 @@
 
 pub mod error;
 pub mod host;
-
 pub mod image;
+#[allow(clippy::module_inception)]
 pub mod repository;
 pub mod target;

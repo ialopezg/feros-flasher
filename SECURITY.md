@@ -39,4 +39,4 @@ writes are not coordinated by a lock.
 Release automation creates drafts for maintainer review. Adjacent SHA-256 files
 detect accidental corruption; replacement of both archive and checksum is not
 prevented. Packages do not claim code signing, notarization, reproducible builds,
-or provenance attestations. See RELEASE.md and THIRD_PARTY.md for review limits.
+or provenance attestations. See THIRD_PARTY.md for dependency review limits.

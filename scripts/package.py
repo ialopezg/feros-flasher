@@ -17,7 +17,7 @@ import tomllib
 from check import check_binary
 
 ROOT = Path(__file__).resolve().parents[1]
-DOCUMENTS = ("README.md", "LICENSE", "CHANGELOG.md", "RELEASE.md", "THIRD_PARTY.md", "Cargo.lock")
+DOCUMENTS = ("README.md", "LICENSE", "CHANGELOG.md", "THIRD_PARTY.md", "Cargo.lock")
 
 
 def git(*args):
